@@ -1,0 +1,12 @@
+__pycache__/
+.vscode/
+venv/
+bin/
+obj/
+Works/
+not_prepared/
+.venv/
+*.sqlite3
+*.zip
+static_collected/
+*_cache/
