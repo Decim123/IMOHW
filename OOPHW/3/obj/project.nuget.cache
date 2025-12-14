@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "+N4RnSrO3Ls=",
+  "success": true,
+  "projectFilePath": "/home/skyceo/projects/IMOHW/OOPHW/3/3.csproj",
+  "expectedPackageFiles": [
+    "/home/skyceo/.nuget/packages/microsoft.aspnetcore.app.ref/10.0.0/microsoft.aspnetcore.app.ref.10.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}

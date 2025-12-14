@@ -1,0 +1,351 @@
+♰ skyceo 00:19 IMOHW/OOPHW/10
+❯  rm -f sched.db.json sched.config.json backup.json sessions.csv report.csv report.json
+dotnet build
+dotnet test
+
+Restore complete (0.8s)
+  10 net10.0 succeeded (0.4s) → bin/Debug/net10.0/10.dll
+
+Build succeeded in 1.9s
+Restore complete (0.7s)
+
+Build succeeded in 1.4s
+
+♰ skyceo 00:22 IMOHW/OOPHW/10
+❯  dotnet run -- init --db sched.db.json
+Initialized. db=sched.db.json
+
+♰ skyceo 00:22 IMOHW/OOPHW/10
+❯  dotnet run -- config show
+db=sched.db.json
+
+♰ skyceo 00:23 IMOHW/OOPHW/10
+❯  dotnet run -- room add --code A-101 --capacity 40 --building Main
+Room A-101 (id=1) created.
+
+♰ skyceo 00:23 IMOHW/OOPHW/10
+❯  dotnet run -- room add --code B-201 --capacity 30 --building Main
+Room B-201 (id=2) created.
+
+♰ skyceo 00:23 IMOHW/OOPHW/10
+❯  dotnet run -- room list
+1	A-101	40	Main
+2	B-201	30	Main
+
+♰ skyceo 00:24 IMOHW/OOPHW/10
+❯  dotnet run -- room show A-101
+{
+  "Id": 1,
+  "Code": "A-101",
+  "Capacity": 40,
+  "Building": "Main",
+  "AttrJson": "{}"
+}
+
+♰ skyceo 00:24 IMOHW/OOPHW/10
+❯  dotnet run -- room update A-101 --capacity 45
+Room updated: id=1
+
+♰ skyceo 00:24 IMOHW/OOPHW/10
+❯  dotnet run -- room delete B-201
+Room deleted.
+
+♰ skyceo 00:24 IMOHW/OOPHW/10
+❯  dotnet run -- room list
+1	A-101	45	Main
+
+♰ skyceo 00:24 IMOHW/OOPHW/10
+❯  dotnet run -- teacher add --name "Ivanov I.I." --email "ivanov@uni.test"
+Teacher Ivanov I.I. (id=1) created.
+
+♰ skyceo 00:24 IMOHW/OOPHW/10
+❯  dotnet run -- teacher add --name "Petrov P.P." --email "petrov@uni.test"
+Teacher Petrov P.P. (id=2) created.
+
+♰ skyceo 00:25 IMOHW/OOPHW/10
+❯  dotnet run -- teacher list
+1	Ivanov I.I.	ivanov@uni.test
+2	Petrov P.P.	petrov@uni.test
+
+♰ skyceo 00:25 IMOHW/OOPHW/10
+❯  dotnet run -- teacher show 1
+{
+  "Id": 1,
+  "Name": "Ivanov I.I.",
+  "Email": "ivanov@uni.test"
+}
+
+♰ skyceo 00:25 IMOHW/OOPHW/10
+❯  dotnet run -- teacher update 2 --name "Petrov P."
+Teacher updated: id=2
+
+♰ skyceo 00:25 IMOHW/OOPHW/10
+❯  dotnet run -- teacher delete 2
+Teacher deleted.
+
+♰ skyceo 00:25 IMOHW/OOPHW/10
+❯  dotnet run -- teacher list
+1	Ivanov I.I.	ivanov@uni.test
+
+♰ skyceo 00:25 IMOHW/OOPHW/10
+❯  dotnet run -- group add --code CS-2025 --size 30 --year 2025
+Group CS-2025 (id=1) created.
+
+♰ skyceo 00:25 IMOHW/OOPHW/10
+❯  dotnet run -- group add --code CS-2026 --size 28 --year 2026
+Group CS-2026 (id=2) created.
+
+♰ skyceo 00:26 IMOHW/OOPHW/10
+❯  dotnet run -- group list
+1	CS-2025	30	2025
+2	CS-2026	28	2026
+
+♰ skyceo 00:26 IMOHW/OOPHW/10
+❯  dotnet run -- group show 1
+{
+  "Id": 1,
+  "Code": "CS-2025",
+  "Size": 30,
+  "Year": 2025
+}
+
+♰ skyceo 00:26 IMOHW/OOPHW/10
+❯  dotnet run -- group update 2 --size 29
+Group updated: id=2
+
+♰ skyceo 00:26 IMOHW/OOPHW/10
+❯  dotnet run -- group list
+1	CS-2025	30	2025
+2	CS-2026	29	2026
+
+♰ skyceo 00:26 IMOHW/OOPHW/10
+❯  dotnet run -- course add --title "Algorithms" --code ALGO101 --duration 90
+Course Algorithms (id=1) created.
+
+♰ skyceo 00:27 IMOHW/OOPHW/10
+❯  dotnet run -- course add --title "Algorithms" --code ALGO101 --duration 90
+Course Algorithms (id=2) created.
+
+♰ skyceo 00:27 IMOHW/OOPHW/10
+❯  dotnet run -- course list
+1	ALGO101	Algorithms	90
+2	ALGO101	Algorithms	90
+
+♰ skyceo 00:27 IMOHW/OOPHW/10
+❯  dotnet run -- course show 1
+{
+  "Id": 1,
+  "Title": "Algorithms",
+  "Code": "ALGO101",
+  "DurationMinutes": 90
+}
+
+♰ skyceo 00:27 IMOHW/OOPHW/10
+❯  dotnet run -- course update 2 --duration 120
+Course updated: id=2
+
+♰ skyceo 00:27 IMOHW/OOPHW/10
+❯  dotnet run -- course list
+1	ALGO101	Algorithms	90
+2	ALGO101	Algorithms	120
+
+♰ skyceo 00:27 IMOHW/OOPHW/10
+❯  dotnet run -- session add --course 1 --teacher 1 --group 1 --room A-101 --date 2025-12-16 --start 10:00 --end 11:30 --notes "Intro"
+Session created: id=1, 2025-12-16 10:00-11:30
+
+♰ skyceo 00:27 IMOHW/OOPHW/10
+❯  dotnet run -- session add --course 2 --teacher 1 --group 2 --room A-101 --date 2025-12-16 --start 12:00 --end 13:30 --notes "Lab"
+Session created: id=2, 2025-12-16 12:00-01:30
+
+♰ skyceo 00:28 IMOHW/OOPHW/10
+❯  dotnet run -- session list --date 2025-12-16
++------------+-------+-------+------------+-------------+---------+-------+-------+
+| Date       | Start | End   | Course     | Teacher     | Group   | Room  | Notes |
++------------+-------+-------+------------+-------------+---------+-------+-------+
+| 2025-12-16 | 10:00 | 11:30 | Algorithms | Ivanov I.I. | CS-2025 | A-101 | Intro |
+| 2025-12-16 | 12:00 | 13:30 | Algorithms | Ivanov I.I. | CS-2026 | A-101 | Lab   |
++------------+-------+-------+------------+-------------+---------+-------+-------+
+
+
+♰ skyceo 00:28 IMOHW/OOPHW/10
+❯  dotnet run -- session show 1
+{
+  "Id": 1,
+  "CourseId": 1,
+  "TeacherId": 1,
+  "GroupId": 1,
+  "RoomId": 1,
+  "Date": "2025-12-16",
+  "Start": "10:00:00",
+  "End": "11:30:00",
+  "Notes": "Intro"
+}
+
+♰ skyceo 00:28 IMOHW/OOPHW/10
+❯  dotnet run -- session update 2 --room 1 --start 12:15 --end 13:45
+Session updated: id=2
+
+♰ skyceo 00:29 IMOHW/OOPHW/10
+❯  dotnet run -- session list --date 2025-12-16
++------------+-------+-------+------------+-------------+---------+-------+-------+
+| Date       | Start | End   | Course     | Teacher     | Group   | Room  | Notes |
++------------+-------+-------+------------+-------------+---------+-------+-------+
+| 2025-12-16 | 10:00 | 11:30 | Algorithms | Ivanov I.I. | CS-2025 | A-101 | Intro |
+| 2025-12-16 | 12:15 | 13:45 | Algorithms | Ivanov I.I. | CS-2026 | A-101 | Lab   |
++------------+-------+-------+------------+-------------+---------+-------+-------+
+
+
+♰ skyceo 00:29 IMOHW/OOPHW/10
+❯  dotnet run -- session delete 2
+Session deleted.
+
+♰ skyceo 00:29 IMOHW/OOPHW/10
+❯  dotnet run -- session list --date 2025-12-16
++------------+-------+-------+------------+-------------+---------+-------+-------+
+| Date       | Start | End   | Course     | Teacher     | Group   | Room  | Notes |
++------------+-------+-------+------------+-------------+---------+-------+-------+
+| 2025-12-16 | 10:00 | 11:30 | Algorithms | Ivanov I.I. | CS-2025 | A-101 | Intro |
++------------+-------+-------+------------+-------------+---------+-------+-------+
+
+
+♰ skyceo 00:29 IMOHW/OOPHW/10
+❯  dotnet run -- session add --course 1 --teacher 1 --group 2 --room 1 --date 2025-12-16 --start 11:00 --end 12:00
+Conflict detected: Room 1 is occupied 10:00-11:30 (session id=1).
+[ble: exit 4]
+
+♰ skyceo 00:29 IMOHW/OOPHW/10
+❯  dotnet run -- session find-conflicts --from 2025-12-16 --to 2025-12-16
+No conflicts.
+
+♰ skyceo 00:29 IMOHW/OOPHW/10
+❯  dotnet run -- session add --course 1 --teacher 1 --group 2 --room 1 --date 2025-12-16 --start 11:00 --end 12:00 --force
+Session created: id=3, 2025-12-16 11:00-12:00
+
+♰ skyceo 00:30 IMOHW/OOPHW/10
+❯  dotnet run -- session list --date 2025-12-16 --conflicts-only
++------------+-------+-------+------------+-------------+---------+-------+-------+
+| Date       | Start | End   | Course     | Teacher     | Group   | Room  | Notes |
++------------+-------+-------+------------+-------------+---------+-------+-------+
+| 2025-12-16 | 10:00 | 11:30 | Algorithms | Ivanov I.I. | CS-2025 | A-101 | Intro |
+| 2025-12-16 | 11:00 | 12:00 | Algorithms | Ivanov I.I. | CS-2026 | A-101 |       |
++------------+-------+-------+------------+-------------+---------+-------+-------+
+
+
+♰ skyceo 00:30 IMOHW/OOPHW/10
+❯  dotnet run -- session add --course 1 --teacher 1 --group 1 --room 1 --date 2025-12-16 --start 14:00 --end 15:30 --recurrence weekly --dow WED --from 2025-12-17 --to 2026-01-14
+Sessions created: 5
+
+♰ skyceo 00:30 IMOHW/OOPHW/10
+❯  dotnet run -- session list --from 2025-12-16 --to 2026-01-20
++------------+-------+-------+------------+-------------+---------+-------+-------+
+| Date       | Start | End   | Course     | Teacher     | Group   | Room  | Notes |
++------------+-------+-------+------------+-------------+---------+-------+-------+
+| 2025-12-16 | 10:00 | 11:30 | Algorithms | Ivanov I.I. | CS-2025 | A-101 | Intro |
+| 2025-12-16 | 11:00 | 12:00 | Algorithms | Ivanov I.I. | CS-2026 | A-101 |       |
+| 2025-12-17 | 14:00 | 15:30 | Algorithms | Ivanov I.I. | CS-2025 | A-101 |       |
+| 2025-12-24 | 14:00 | 15:30 | Algorithms | Ivanov I.I. | CS-2025 | A-101 |       |
+| 2025-12-31 | 14:00 | 15:30 | Algorithms | Ivanov I.I. | CS-2025 | A-101 |       |
+| 2026-01-07 | 14:00 | 15:30 | Algorithms | Ivanov I.I. | CS-2025 | A-101 |       |
+| 2026-01-14 | 14:00 | 15:30 | Algorithms | Ivanov I.I. | CS-2025 | A-101 |       |
++------------+-------+-------+------------+-------------+---------+-------+-------+
+
+
+♰ skyceo 00:30 IMOHW/OOPHW/10
+❯  dotnet run -- export json --out backup.json
+Exported JSON: backup.json
+
+♰ skyceo 00:31 IMOHW/OOPHW/10
+❯  ls -l backup.json
+-rw-r--r-- 1 skyceo skyceo 2274 Dec 15 00:31 backup.json
+
+♰ skyceo 00:31 IMOHW/OOPHW/10
+❯  dotnet run -- export csv --entity sessions --out sessions.csv --from 2025-12-16 --to 2026-01-20
+Exported CSV: sessions.csv
+
+♰ skyceo 00:31 IMOHW/OOPHW/10
+❯  head -n 5 sessions.csv
+date,start,end,courseId,teacherId,groupId,roomId,notes
+2025-12-16,10:00,11:30,1,1,1,1,Intro
+2025-12-16,11:00,12:00,1,1,2,1,
+2025-12-17,14:00,15:30,1,1,1,1,
+2025-12-24,14:00,15:30,1,1,1,1,
+
+♰ skyceo 00:31 IMOHW/OOPHW/10
+❯  dotnet run -- import json --file backup.json
+Imported JSON.
+
+♰ skyceo 00:33 IMOHW/OOPHW/10
+❯  dotnet run -- import csv --entity sessions --file sessions.csv --mode replace
+Imported: added=6, failed=1
+line 3: Conflict detected: Room 1 is occupied 10:00-11:30 (session id=9).
+[ble: exit 2]
+
+♰ skyceo 00:33 IMOHW/OOPHW/10
+❯  dotnet run -- session list --from 2025-12-16 --to 2026-01-20
++------------+-------+-------+------------+-------------+---------+-------+-------+
+| Date       | Start | End   | Course     | Teacher     | Group   | Room  | Notes |
++------------+-------+-------+------------+-------------+---------+-------+-------+
+| 2025-12-16 | 10:00 | 11:30 | Algorithms | Ivanov I.I. | CS-2025 | A-101 | Intro |
+| 2025-12-17 | 14:00 | 15:30 | Algorithms | Ivanov I.I. | CS-2025 | A-101 |       |
+| 2025-12-24 | 14:00 | 15:30 | Algorithms | Ivanov I.I. | CS-2025 | A-101 |       |
+| 2025-12-31 | 14:00 | 15:30 | Algorithms | Ivanov I.I. | CS-2025 | A-101 |       |
+| 2026-01-07 | 14:00 | 15:30 | Algorithms | Ivanov I.I. | CS-2025 | A-101 |       |
+| 2026-01-14 | 14:00 | 15:30 | Algorithms | Ivanov I.I. | CS-2025 | A-101 |       |
++------------+-------+-------+------------+-------------+---------+-------+-------+
+
+
+♰ skyceo 00:34 IMOHW/OOPHW/10
+❯  dotnet run -- backup --out backup.json
+Backup written: backup.json
+
+♰ skyceo 00:34 IMOHW/OOPHW/10
+❯  rm -f sched.db.json
+
+♰ skyceo 00:34 IMOHW/OOPHW/10
+❯  dotnet run -- restore --from backup.json
+Restored.
+
+♰ skyceo 00:34 IMOHW/OOPHW/10
+❯  dotnet run -- session list --from 2025-12-16 --to 2026-01-20
++------------+-------+-------+------------+-------------+---------+-------+-------+
+| Date       | Start | End   | Course     | Teacher     | Group   | Room  | Notes |
++------------+-------+-------+------------+-------------+---------+-------+-------+
+| 2025-12-16 | 10:00 | 11:30 | Algorithms | Ivanov I.I. | CS-2025 | A-101 | Intro |
+| 2025-12-17 | 14:00 | 15:30 | Algorithms | Ivanov I.I. | CS-2025 | A-101 |       |
+| 2025-12-24 | 14:00 | 15:30 | Algorithms | Ivanov I.I. | CS-2025 | A-101 |       |
+| 2025-12-31 | 14:00 | 15:30 | Algorithms | Ivanov I.I. | CS-2025 | A-101 |       |
+| 2026-01-07 | 14:00 | 15:30 | Algorithms | Ivanov I.I. | CS-2025 | A-101 |       |
+| 2026-01-14 | 14:00 | 15:30 | Algorithms | Ivanov I.I. | CS-2025 | A-101 |       |
++------------+-------+-------+------------+-------------+---------+-------+-------+
+
+
+♰ skyceo 00:34 IMOHW/OOPHW/10
+❯  dotnet run -- report day --date 2025-12-16 --format text
++------------+-------+-------+------------+-------------+---------+-------+-------+
+| Date       | Start | End   | Course     | Teacher     | Group   | Room  | Notes |
++------------+-------+-------+------------+-------------+---------+-------+-------+
+| 2025-12-16 | 10:00 | 11:30 | Algorithms | Ivanov I.I. | CS-2025 | A-101 | Intro |
++------------+-------+-------+------------+-------------+---------+-------+-------+
+
+
+♰ skyceo 00:34 IMOHW/OOPHW/10
+❯  dotnet run -- report group --group 1 --from 2025-12-16 --to 2026-01-20 --format json > report.json
+
+♰ skyceo 00:34 IMOHW/OOPHW/10
+❯  dotnet run -- report teacher --teacher 1 --from 2025-12-16 --to 2026-01-20 --format csv > report.csv
+
+♰ skyceo 00:35 IMOHW/OOPHW/10
+❯  ls -l report.json report.csv
+-rw-r--r-- 1 skyceo skyceo  439 Dec 15 00:35 report.csv
+-rw-r--r-- 1 skyceo skyceo 1267 Dec 15 00:34 report.json
+
+♰ skyceo 00:35 IMOHW/OOPHW/10
+❯  head -n 5 report.csv
+id,date,start,end,course,teacher,group,room,notes
+9,2025-12-16,10:00,11:30,Algorithms,Ivanov I.I.,CS-2025,A-101,Intro
+10,2025-12-17,14:00,15:30,Algorithms,Ivanov I.I.,CS-2025,A-101,
+11,2025-12-24,14:00,15:30,Algorithms,Ivanov I.I.,CS-2025,A-101,
+12,2025-12-31,14:00,15:30,Algorithms,Ivanov I.I.,CS-2025,A-101,
+
+♰ skyceo 00:35 IMOHW/OOPHW/10
+❯  

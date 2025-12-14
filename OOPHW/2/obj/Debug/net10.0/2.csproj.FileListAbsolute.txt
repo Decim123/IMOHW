@@ -1,0 +1,15 @@
+/home/skyceo/projects/IMOHW/OOPHW/2/bin/Debug/net10.0/2
+/home/skyceo/projects/IMOHW/OOPHW/2/bin/Debug/net10.0/2.deps.json
+/home/skyceo/projects/IMOHW/OOPHW/2/bin/Debug/net10.0/2.runtimeconfig.json
+/home/skyceo/projects/IMOHW/OOPHW/2/bin/Debug/net10.0/2.dll
+/home/skyceo/projects/IMOHW/OOPHW/2/bin/Debug/net10.0/2.pdb
+/home/skyceo/projects/IMOHW/OOPHW/2/obj/Debug/net10.0/2.GeneratedMSBuildEditorConfig.editorconfig
+/home/skyceo/projects/IMOHW/OOPHW/2/obj/Debug/net10.0/2.AssemblyInfoInputs.cache
+/home/skyceo/projects/IMOHW/OOPHW/2/obj/Debug/net10.0/2.AssemblyInfo.cs
+/home/skyceo/projects/IMOHW/OOPHW/2/obj/Debug/net10.0/2.csproj.CoreCompileInputs.cache
+/home/skyceo/projects/IMOHW/OOPHW/2/obj/Debug/net10.0/2.sourcelink.json
+/home/skyceo/projects/IMOHW/OOPHW/2/obj/Debug/net10.0/2.dll
+/home/skyceo/projects/IMOHW/OOPHW/2/obj/Debug/net10.0/refint/2.dll
+/home/skyceo/projects/IMOHW/OOPHW/2/obj/Debug/net10.0/2.pdb
+/home/skyceo/projects/IMOHW/OOPHW/2/obj/Debug/net10.0/2.genruntimeconfig.cache
+/home/skyceo/projects/IMOHW/OOPHW/2/obj/Debug/net10.0/ref/2.dll
