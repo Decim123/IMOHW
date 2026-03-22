@@ -1,0 +1,11 @@
+{
+  "users": [
+    {
+      "username": "test",
+      "email": "test@gmail.com",
+      "password_hash": "$2b$12$AShbZGXqkdGaa06RTzfWv.NcGaxVy5aajz34dwqu31KFGuWm.v5RK",
+      "failed_attempts": 0,
+      "locked_until": null
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+secure_project/
+├── backup
+│   └── secret_plan.txt
+├── docs
+│   └── secret_plan.txt
+├── evidence.log
+├── report.txt
+└── src
+
+4 directories, 4 files
