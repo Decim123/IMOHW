@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Комментарии</title>
+</head>
+<body>
+    <h1>Публичные комментарии</h1>
+    <p>Разрешены только теги <code>b</code>, <code>i</code>, <code>u</code>, <code>em</code>, <code>strong</code>.</p>
+
+    <form action="/comments" method="post">
+        <label for="text">Текст комментария</label>
+        <br>
+        <textarea id="text" name="text" rows="6" cols="60" placeholder="Например: &lt;b&gt;Важное&lt;/b&gt; сообщение"></textarea>
+        <br>
+        <button type="submit">Отправить</button>
+    </form>
+
+    <h2>Список комментариев</h2>
+    <ul>
+        {% for comment in comments %}
+        <li>{{ comment }}</li>
+        {% else %}
+        <li>Комментариев пока нет</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
