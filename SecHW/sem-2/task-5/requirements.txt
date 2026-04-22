@@ -1,0 +1,5 @@
+fastapi==0.136.0
+uvicorn==0.45.0
+pydantic[email]==2.13.3
+python-dotenv==1.2.2
+pip-audit==2.10.0
