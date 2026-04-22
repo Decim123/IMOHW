@@ -1,0 +1,8 @@
+/home/skyceo/projects/IMOHW/OOPHW/10/Sched.Tests/bin/Debug/net10.0/.msCoverageSourceRootsMapping_Sched.Tests
+/home/skyceo/projects/IMOHW/OOPHW/10/Sched.Tests/bin/Debug/net10.0/CoverletSourceRootsMapping_Sched.Tests
+/home/skyceo/projects/IMOHW/OOPHW/10/Sched.Tests/obj/Debug/net10.0/Sched.Tests.csproj.AssemblyReference.cache
+/home/skyceo/projects/IMOHW/OOPHW/10/Sched.Tests/obj/Debug/net10.0/Sched.Tests.GeneratedMSBuildEditorConfig.editorconfig
+/home/skyceo/projects/IMOHW/OOPHW/10/Sched.Tests/obj/Debug/net10.0/Sched.Tests.AssemblyInfoInputs.cache
+/home/skyceo/projects/IMOHW/OOPHW/10/Sched.Tests/obj/Debug/net10.0/Sched.Tests.AssemblyInfo.cs
+/home/skyceo/projects/IMOHW/OOPHW/10/Sched.Tests/obj/Debug/net10.0/Sched.Tests.csproj.CoreCompileInputs.cache
+/home/skyceo/projects/IMOHW/OOPHW/10/Sched.Tests/obj/Debug/net10.0/Sched.Tests.sourcelink.json

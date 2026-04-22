@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Файлообменник</title>
+</head>
+<body>
+    <h1>Файлообменник</h1>
+    <p>Демонстрация контроля доступа по ролям.</p>
+
+    <form action="/" method="get">
+        <label for="user_id">Текущий пользователь:</label>
+        <select id="user_id" name="user_id">
+            {% for user in users %}
+            <option value="{{ user.id }}" {% if user.id == current_user.id %}selected{% endif %}>
+                {{ user.username }} ({{ "администратор" if user.role == "admin" else "пользователь" }})
+            </option>
+            {% endfor %}
+        </select>
+        <button type="submit">Переключить</button>
+    </form>
+
+    <p>
+        Сейчас вы вошли как:
+        <strong>{{ current_user.username }}</strong>,
+        роль:
+        <strong>{{ "администратор" if current_user.role == "admin" else "пользователь" }}</strong>.
+    </p>
+
+    {% if message %}
+    <p><strong>{{ message }}</strong></p>
+    {% endif %}
+
+    {% if selected_file %}
+    <h2>Выбранный файл</h2>
+    <ul>
+        <li>Идентификатор: {{ selected_file.id }}</li>
+        <li>Имя: {{ selected_file["имя"] }}</li>
+        <li>Размер: {{ selected_file["размер_кб"] }} КБ</li>
+        <li>Владелец: {{ selected_file["владелец"] }}</li>
+    </ul>
+    {% endif %}
+
+    <h2>Открыть файл по идентификатору</h2>
+    <form action="/ui/file" method="get">
+        <input type="hidden" name="user_id" value="{{ current_user.id }}">
+        <label for="file_id">ID файла:</label>
+        <input id="file_id" name="file_id" type="number" min="1" required>
+        <button type="submit">Открыть</button>
+    </form>
+
+    <h2>Мои файлы</h2>
+    <ul>
+        {% for file in my_files %}
+        <li>
+            {{ file["имя"] }} ({{ file["размер_кб"] }} КБ)
+            <a href="/files/{{ file.id }}?user_id={{ current_user.id }}">JSON</a>
+            <form action="/ui/delete" method="post" style="display:inline;">
+                <input type="hidden" name="user_id" value="{{ current_user.id }}">
+                <input type="hidden" name="file_id" value="{{ file.id }}">
+                <button type="submit">Удалить</button>
+            </form>
+        </li>
+        {% else %}
+        <li>У вас пока нет файлов.</li>
+        {% endfor %}
+    </ul>
+
+    {% if current_user.role == "admin" %}
+    <h2>Все файлы</h2>
+    <ul>
+        {% for file in all_files %}
+        <li>
+            ID {{ file.id }}:
+            {{ file["имя"] }},
+            владелец: {{ file["владелец"] }},
+            размер: {{ file["размер_кб"] }} КБ
+            <a href="/files/{{ file.id }}?user_id={{ current_user.id }}">JSON</a>
+        </li>
+        {% endfor %}
+    </ul>
+    <p><a href="/files/all?user_id={{ current_user.id }}">Открыть JSON со всеми файлами</a></p>
+    {% endif %}
+
+    <h2>Подсказка</h2>
+    <p>Для API-запросов можно передавать пользователя через query-параметр <code>user_id</code> или заголовок <code>X-User-Id</code>.</p>
+</body>
+</html>

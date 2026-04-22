@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="10/10.csproj" />
+  <Project Path="Sched.Tests/Sched.Tests.csproj" />
+</Solution>

@@ -615,6 +615,16 @@
           "build/netcoreapp3.1/NUnit3TestAdapter.props": {},
           "build/netcoreapp3.1/NUnit3TestAdapter.targets": {}
         }
+      },
+      "10/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "compile": {
+          "bin/placeholder/10.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/10.dll": {}
+        }
       }
     }
   },
@@ -1504,10 +1514,16 @@
         "nunit3testadapter.nuspec",
         "nunit_256.png"
       ]
+    },
+    "10/1.0.0": {
+      "type": "project",
+      "path": "../10/10.csproj",
+      "msbuildProject": "../10/10.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net10.0": [
+      "10 >= 1.0.0",
       "Microsoft.NET.Test.Sdk >= 17.14.0",
       "NUnit >= 4.3.2",
       "NUnit.Analyzers >= 4.7.0",
@@ -1539,7 +1555,11 @@
       "frameworks": {
         "net10.0": {
           "targetAlias": "net10.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "/home/skyceo/projects/IMOHW/OOPHW/10/10/10.csproj": {
+              "projectPath": "/home/skyceo/projects/IMOHW/OOPHW/10/10/10.csproj"
+            }
+          }
         }
       },
       "warningProperties": {
