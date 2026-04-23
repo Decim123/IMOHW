@@ -7,7 +7,7 @@
 </head>
 <body>
     <h1>Файлообменник</h1>
-    <p>Демонстрация контроля доступа по ролям.</p>
+    <p>Безопасная загрузка, скачивание и разграничение доступа.</p>
 
     <form action="/" method="get">
         <label for="user_id">Текущий пользователь:</label>
@@ -37,10 +37,19 @@
     <ul>
         <li>Идентификатор: {{ selected_file.id }}</li>
         <li>Имя: {{ selected_file["имя"] }}</li>
-        <li>Размер: {{ selected_file["размер_кб"] }} КБ</li>
+        <li>Размер: {{ selected_file["размер_байт"] }} байт</li>
+        <li>Тип: {{ selected_file["тип"] }}</li>
         <li>Владелец: {{ selected_file["владелец"] }}</li>
     </ul>
     {% endif %}
+
+    <h2>Загрузить файл</h2>
+    <form action="/ui/upload?user_id={{ current_user.id }}" method="post" enctype="multipart/form-data">
+        <label for="uploaded_file">Файл:</label>
+        <input id="uploaded_file" name="uploaded_file" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" required>
+        <button type="submit">Загрузить</button>
+    </form>
+    <p>Разрешены только JPEG и PNG. Максимальный размер: {{ max_file_size_mb }} МБ.</p>
 
     <h2>Открыть файл по идентификатору</h2>
     <form action="/ui/file" method="get">
@@ -54,8 +63,9 @@
     <ul>
         {% for file in my_files %}
         <li>
-            {{ file["имя"] }} ({{ file["размер_кб"] }} КБ)
+            ID {{ file.id }}: {{ file["имя"] }} ({{ file["размер_байт"] }} байт, {{ file["тип"] }})
             <a href="/files/{{ file.id }}?user_id={{ current_user.id }}">JSON</a>
+            <a href="/files/{{ file.id }}/download?user_id={{ current_user.id }}">Скачать</a>
             <form action="/ui/delete" method="post" style="display:inline;">
                 <input type="hidden" name="user_id" value="{{ current_user.id }}">
                 <input type="hidden" name="file_id" value="{{ file.id }}">
@@ -72,16 +82,13 @@
     <ul>
         {% for file in all_files %}
         <li>
-            ID {{ file.id }}:
-            {{ file["имя"] }},
-            владелец: {{ file["владелец"] }},
-            размер: {{ file["размер_кб"] }} КБ
+            ID {{ file.id }}: {{ file["имя"] }}, владелец: {{ file["владелец"] }}, размер: {{ file["размер_байт"] }} байт, тип: {{ file["тип"] }}
             <a href="/files/{{ file.id }}?user_id={{ current_user.id }}">JSON</a>
+            <a href="/files/{{ file.id }}/download?user_id={{ current_user.id }}">Скачать</a>
         </li>
         {% endfor %}
     </ul>
     <p><a href="/files/all?user_id={{ current_user.id }}">Открыть JSON со всеми файлами</a></p>
     {% endif %}
-
 </body>
 </html>
