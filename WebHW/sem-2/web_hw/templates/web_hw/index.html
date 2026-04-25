@@ -18,66 +18,27 @@
 <main class="py-5">
   <div class="container">
     <div class="row g-4">
+      {% for product in products %}
       <div class="col-md-6 col-lg-4">
         <div class="card h-100">
-          <img src="https://placehold.co/300x200" class="card-img-top" alt="Карточка 1">
+          {% if product.image %}
+          <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.title }}">
+          {% else %}
+          <img src="https://placehold.co/300x200" class="card-img-top" alt="{{ product.title }}">
+          {% endif %}
           <div class="card-body d-flex flex-column">
-            <h5 class="card-title">Товар 1</h5>
-            <p class="card-text">Краткое описание первого предложения для демонстрации карточки.</p>
+            <h5 class="card-title">{{ product.title }}</h5>
+            <p class="card-text">{{ product.description }}</p>
+            <p class="fw-semibold mb-3">{{ product.price }} ₽</p>
             <a href="{% url 'about' %}" class="btn btn-outline-primary mt-auto">Подробнее</a>
           </div>
         </div>
       </div>
-      <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-          <img src="https://placehold.co/300x200" class="card-img-top" alt="Карточка 2">
-          <div class="card-body d-flex flex-column">
-            <h5 class="card-title">Товар 2</h5>
-            <p class="card-text">Краткое описание первого предложения для демонстрации карточки.</p>
-            <a href="{% url 'about' %}" class="btn btn-outline-primary mt-auto">Подробнее</a>
-          </div>
-        </div>
+      {% empty %}
+      <div class="col-12">
+        <div class="alert alert-secondary mb-0">Пока нет товаров. Добавьте их через админ-панель.</div>
       </div>
-      <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-          <img src="https://placehold.co/300x200" class="card-img-top" alt="Карточка 3">
-          <div class="card-body d-flex flex-column">
-            <h5 class="card-title">Товар 3</h5>
-            <p class="card-text">Краткое описание первого предложения для демонстрации карточки.</p>
-            <a href="{% url 'about' %}" class="btn btn-outline-primary mt-auto">Подробнее</a>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-          <img src="https://placehold.co/300x200" class="card-img-top" alt="Карточка 4">
-          <div class="card-body d-flex flex-column">
-            <h5 class="card-title">Товар 4</h5>
-            <p class="card-text">Краткое описание первого предложения для демонстрации карточки.</p>
-            <a href="{% url 'about' %}" class="btn btn-outline-primary mt-auto">Подробнее</a>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-          <img src="https://placehold.co/300x200" class="card-img-top" alt="Карточка 5">
-          <div class="card-body d-flex flex-column">
-            <h5 class="card-title">Товар 5</h5>
-            <p class="card-text">Краткое описание первого предложения для демонстрации карточки.</p>
-            <a href="{% url 'about' %}" class="btn btn-outline-primary mt-auto">Подробнее</a>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-          <img src="https://placehold.co/300x200" class="card-img-top" alt="Карточка 6">
-          <div class="card-body d-flex flex-column">
-            <h5 class="card-title">Товар 6</h5>
-            <p class="card-text">Краткое описание первого предложения для демонстрации карточки.</p>
-            <a href="{% url 'about' %}" class="btn btn-outline-primary mt-auto">Подробнее</a>
-          </div>
-        </div>
-      </div>
+      {% endfor %}
     </div>
   </div>
 </main>
