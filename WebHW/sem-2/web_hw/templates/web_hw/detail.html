@@ -1,0 +1,31 @@
+{% extends 'web_hw/base.html' %}
+
+{% block title %}{{ product.title }}{% endblock %}
+
+{% block content %}
+<section class="py-5">
+  <div class="container">
+    <div class="mb-4">
+      <h1 class="display-5 fw-bold mb-3">{{ product.title }}</h1>
+    </div>
+    <div class="row g-4 align-items-start mb-4">
+      <div class="col-md-4">
+        {% if product.image %}
+        <img src="{{ product.image.url }}" class="img-fluid rounded shadow-sm w-100" alt="{{ product.title }}">
+        {% else %}
+        <img src="https://placehold.co/600x600" class="img-fluid rounded shadow-sm w-100" alt="{{ product.title }}">
+        {% endif %}
+      </div>
+      <div class="col-md-8">
+        <h2 class="h3 mb-3">{{ product.author }}</h2>
+        <p class="fs-5 fw-semibold mb-2">{{ product.price }} ₽</p>
+        <p class="text-muted mb-0">{{ product.created_at|date:"d.m.Y H:i" }}</p>
+      </div>
+    </div>
+    <div class="mb-4">
+      <div class="fs-5" style="white-space: pre-line;">{{ product.lyrics }}</div>
+    </div>
+    <a href="{% url 'home' %}" class="btn btn-primary">Назад</a>
+  </div>
+</section>
+{% endblock %}
