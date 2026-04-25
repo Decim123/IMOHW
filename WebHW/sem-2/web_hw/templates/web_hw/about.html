@@ -1,0 +1,14 @@
+{% extends 'web_hw/base.html' %}
+
+{% block title %}О нас{% endblock %}
+
+{% block content %}
+<section class="py-5">
+  <div class="container py-4">
+    <h1 class="display-5 fw-bold mb-3">О нас</h1>
+    <p class="lead mb-3">Это дополнительная страница сайта</p>
+    <p class="mb-4">контакты телефоны почты адреса</p>
+    <a href="{% url 'home' %}" class="btn btn-primary">Вернуться на главную</a>
+  </div>
+</section>
+{% endblock %}
