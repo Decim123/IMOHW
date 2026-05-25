@@ -17,34 +17,36 @@
         {% endif %}
       </div>
       <div class="col-md-8">
-        <h2 class="h3 mb-3">{{ product.author }}</h2>
+        <h2 class="h3 mb-3">{{ product.artist }}</h2>
         <p class="fs-5 fw-semibold mb-2">{{ product.price }} ₽</p>
+        <p class="text-muted mb-2">Добавил: {{ product.author.username }}</p>
         <p class="text-muted mb-0">{{ product.created_at|date:"d.m.Y H:i" }}</p>
+        {% if product.tags.all %}
+        <div class="d-flex flex-wrap gap-2 mt-3">
+          {% for tag in product.tags.all %}
+          <a href="{{ tag.get_absolute_url }}" class="badge text-bg-light text-decoration-none">{{ tag.name }}</a>
+          {% endfor %}
+        </div>
+        {% endif %}
       </div>
     </div>
     <div class="mb-4">
       <div class="fs-5" style="white-space: pre-line;">{{ product.lyrics }}</div>
     </div>
     <div class="mb-4">
+      {% if user == product.author %}
       <a href="{% url 'product_update' product.pk %}" class="btn btn-outline-dark">Редактировать</a>
+      <a href="{% url 'product_delete' product.pk %}" class="btn btn-outline-danger">Удалить</a>
+      {% endif %}
     </div>
     <div class="row g-4 mb-4">
       <div class="col-lg-6">
         <div class="card border-0 shadow-sm">
           <div class="card-body p-4">
             <h2 class="h4 mb-3">Оставить комментарий</h2>
-            <form method="post">
+            {% if user.is_authenticated %}
+            <form method="post" action="{% url 'add_comment' product.pk %}">
               {% csrf_token %}
-              <div class="mb-3">
-                {{ form.subject.label_tag }}
-                {{ form.subject }}
-                {{ form.subject.errors }}
-              </div>
-              <div class="mb-3">
-                {{ form.email.label_tag }}
-                {{ form.email }}
-                {{ form.email.errors }}
-              </div>
               <div class="mb-3">
                 {{ form.text.label_tag }}
                 {{ form.text }}
@@ -52,6 +54,10 @@
               </div>
               <button type="submit" class="btn btn-dark">Отправить</button>
             </form>
+            {% else %}
+            <p class="mb-3">Чтобы оставить комментарий, войдите в аккаунт.</p>
+            <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-dark">Войти</a>
+            {% endif %}
           </div>
         </div>
       </div>
@@ -61,10 +67,9 @@
         <div class="card mb-3 border-0 shadow-sm">
           <div class="card-body">
             <div class="d-flex justify-content-between align-items-start mb-2">
-              <h3 class="h6 mb-0">{{ comment.subject }}</h3>
+              <h3 class="h6 mb-0">{{ comment.author.username }}</h3>
               <span class="text-muted small">{{ comment.created_at|date:"d.m.Y H:i" }}</span>
             </div>
-            <p class="text-muted small mb-2">{{ comment.email }}</p>
             <p class="mb-0" style="white-space: pre-line;">{{ comment.text }}</p>
           </div>
         </div>

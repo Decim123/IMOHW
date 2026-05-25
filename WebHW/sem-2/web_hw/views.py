@@ -1,67 +1,143 @@
+from django.contrib import messages
+from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse_lazy
+from django.views.generic import DeleteView, DetailView, ListView
+from django.views.generic.edit import CreateView, UpdateView
 
-from web_hw.forms import FeedbackForm, ProductForm
-from web_hw.models import Comment, Product
-
-
-def index(request):
-    context = {
-        'title': 'Главная страница',
-        'welcome_text': 'Добро пожаловать на наш лучший сайт!',
-        'products': Product.objects.order_by('-created_at'),
-    }
-    return render(request, 'web_hw/index.html', context)
+from web_hw.forms import CommentForm, ProductForm, RegisterForm
+from web_hw.models import Product, Tag
 
 
-def product_detail(request, pk):
+class ProductListView(ListView):
+    model = Product
+    template_name = 'web_hw/index.html'
+    context_object_name = 'products'
+    ordering = ['-created_at']
+
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related('tags')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Главная страница'
+        context['welcome_text'] = 'Добро пожаловать на наш лучший сайт!'
+        return context
+
+
+class ProductsByTagView(ProductListView):
+    def get_queryset(self):
+        self.tag = get_object_or_404(Tag, slug=self.kwargs['slug'])
+        return self.tag.products.prefetch_related('tags').order_by('-created_at')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = f'Тег: {self.tag.name}'
+        context['welcome_text'] = 'Треки с выбранным тегом'
+        context['current_tag'] = self.tag
+        return context
+
+
+class ProductDetailView(DetailView):
+    model = Product
+    template_name = 'web_hw/detail.html'
+    context_object_name = 'product'
+
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related('tags')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = CommentForm()
+        context['comments'] = self.object.comments.order_by('-created_at')
+        return context
+
+
+class ProductCreateView(LoginRequiredMixin, CreateView):
+    model = Product
+    form_class = ProductForm
+    template_name = 'web_hw/form.html'
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        messages.success(self.request, 'Трек успешно создан.')
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'Трек не удалось создать. Проверьте поля формы.')
+        return super().form_invalid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_title'] = 'Создание трека'
+        return context
+
+
+class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Product
+    form_class = ProductForm
+    template_name = 'web_hw/form.html'
+
+    def test_func(self):
+        return self.get_object().author == self.request.user
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Трек успешно обновлен.')
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'Трек не удалось обновить. Проверьте поля формы.')
+        return super().form_invalid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_title'] = 'Редактирование трека'
+        return context
+
+
+class ProductDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Product
+    template_name = 'web_hw/product_confirm_delete.html'
+    success_url = reverse_lazy('home')
+
+    def test_func(self):
+        return self.get_object().author == self.request.user
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Трек удален.')
+        return super().form_valid(form)
+
+
+@login_required
+def add_comment(request, pk):
     product = get_object_or_404(Product, pk=pk)
     if request.method == 'POST':
-        form = FeedbackForm(request.POST)
+        form = CommentForm(request.POST)
         if form.is_valid():
-            print(form.cleaned_data)
-            Comment.objects.create(
-                product=product,
-                subject=form.cleaned_data['subject'],
-                email=form.cleaned_data['email'],
-                text=form.cleaned_data['text'],
-            )
-            return redirect(product.get_absolute_url())
-    else:
-        form = FeedbackForm()
-    context = {
-        'product': product,
-        'form': form,
-        'comments': product.comments.order_by('-created_at'),
-    }
-    return render(request, 'web_hw/detail.html', context)
+            comment = form.save(commit=False)
+            comment.post = product
+            comment.author = request.user
+            comment.save()
+            messages.success(request, 'Комментарий добавлен.')
+        else:
+            messages.error(request, 'Комментарий не удалось добавить. Проверьте текст.')
+    return redirect(product.get_absolute_url())
 
 
-def product_create(request):
+def register(request):
     if request.method == 'POST':
-        form = ProductForm(request.POST, request.FILES)
+        form = RegisterForm(request.POST)
         if form.is_valid():
-            product = form.save()
-            return redirect(product.get_absolute_url())
+            user = form.save()
+            login(request, user)
+            messages.success(request, 'Регистрация прошла успешно.')
+            return redirect('home')
+        messages.error(request, 'Регистрация не удалась. Проверьте данные формы.')
     else:
-        form = ProductForm()
-    return render(request, 'web_hw/form.html', {'form': form, 'page_title': 'Создание трека'})
-
-
-def product_update(request, pk):
-    product = get_object_or_404(Product, pk=pk)
-    if request.method == 'POST':
-        form = ProductForm(request.POST, request.FILES, instance=product)
-        if form.is_valid():
-            product = form.save()
-            return redirect(product.get_absolute_url())
-    else:
-        form = ProductForm(instance=product)
-    context = {
-        'form': form,
-        'page_title': 'Редактирование трека',
-        'product': product,
-    }
-    return render(request, 'web_hw/form.html', context)
+        form = RegisterForm()
+    return render(request, 'registration/register.html', {'form': form})
 
 
 def about(request):

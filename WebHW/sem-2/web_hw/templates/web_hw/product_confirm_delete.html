@@ -1,0 +1,25 @@
+{% extends 'web_hw/base.html' %}
+
+{% block title %}Удаление трека{% endblock %}
+
+{% block content %}
+<section class="py-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4 p-lg-5">
+            <h1 class="h2 mb-3">Удалить трек?</h1>
+            <p class="mb-4">"{{ product.title }}" будет удален вместе с комментариями.</p>
+            <form method="post">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger">Удалить</button>
+              <a href="{{ product.get_absolute_url }}" class="btn btn-outline-secondary">Отмена</a>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
