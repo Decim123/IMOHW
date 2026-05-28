@@ -1,0 +1,36 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход</title>
+</head>
+<body>
+    <h1>Вход</h1>
+    <p>Простая форма для проверки успешного и неуспешного входа.</p>
+
+    {% if message %}
+    <p><strong>{{ message }}</strong></p>
+    {% endif %}
+
+    <form action="/login" method="post">
+        <label for="username">Логин:</label>
+        <input id="username" name="username" type="text" required>
+
+        <label for="password">Пароль:</label>
+        <input id="password" name="password" type="password" required>
+
+        <button type="submit">Войти</button>
+    </form>
+
+    <h2>Тестовые учетные записи</h2>
+    <p>Имена пользователей доступны ниже, а секреты задаются через `.env`.</p>
+    <ul>
+        {% for item in login_accounts %}
+        <li>{{ item.username }} ({{ item.role }}), секрет из {{ item.secret_env }}</li>
+        {% endfor %}
+    </ul>
+
+    <p><a href="/">Вернуться на главную</a></p>
+</body>
+</html>

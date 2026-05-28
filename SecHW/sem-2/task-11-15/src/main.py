@@ -1,9 +1,11 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import base64
 import json
+import logging
 import os
 import re
+import secrets
 import uuid
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -13,7 +15,7 @@ import filetype
 from cryptography.fernet import Fernet, InvalidToken
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Query, Request, UploadFile, status
-from fastapi.responses import FileResponse, RedirectResponse, Response
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, Response
 from fastapi.templating import Jinja2Templates
 
 from src.schemas import StoredFile, User
@@ -21,6 +23,8 @@ from src.schemas import StoredFile, User
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 STORAGE_DIR = BASE_DIR / "storage"
+LOGS_DIR = BASE_DIR / "logs"
+LOG_FILE_PATH = LOGS_DIR / "app.log"
 METADATA_PATH = STORAGE_DIR / "files_db.json"
 MAX_FILE_SIZE_BYTES = 2 * 1024 * 1024
 READ_CHUNK_SIZE = 64 * 1024
@@ -36,6 +40,35 @@ INITIAL_FILE_DEFINITIONS = [
     {"id": 2, "owner_id": 2, "original_name": "bob_report.png", "stored_name": "seed-bob.png"},
     {"id": 3, "owner_id": 3, "original_name": "admin_report.png", "stored_name": "seed-admin.png"},
 ]
+LOGIN_CREDENTIALS = {
+    "alice": {"user_id": 1},
+    "bob": {"user_id": 2},
+    "admin": {"user_id": 3},
+}
+
+
+def configure_logging() -> logging.Logger:
+    LOGS_DIR.mkdir(parents=True, exist_ok=True)
+    app_logger = logging.getLogger("app")
+    if app_logger.handlers:
+        return app_logger
+
+    app_logger.setLevel(logging.INFO)
+    formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
+
+    file_handler = logging.FileHandler(LOG_FILE_PATH, encoding="utf-8")
+    file_handler.setFormatter(formatter)
+
+    stream_handler = logging.StreamHandler()
+    stream_handler.setFormatter(formatter)
+
+    app_logger.addHandler(file_handler)
+    app_logger.addHandler(stream_handler)
+    app_logger.propagate = False
+    return app_logger
+
+
+logger = configure_logging()
 
 load_dotenv(BASE_DIR / ".env")
 FERNET_KEY = os.getenv("FERNET_KEY")
@@ -44,7 +77,7 @@ if not FERNET_KEY:
 
 cipher_suite = Fernet(FERNET_KEY.encode("utf-8"))
 
-app = FastAPI(title="Задача 11")
+app = FastAPI(title="Задача 13")
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 users_db: List[User] = [
@@ -63,8 +96,47 @@ def get_user_by_id(user_id: int) -> Optional[User]:
     return None
 
 
+def get_user_label(user: Optional[User]) -> str:
+    return user.username if user else "anonymous"
+
+
+def log_security_event(action: str, actor: str, details: str = "") -> None:
+    suffix = f" {details}" if details else ""
+    logger.warning("Security event: actor=%s action=%s%s", actor, action, suffix)
+
+
+def build_login_secret_env_name(login: str) -> str:
+    return f"LOGIN_{login.upper()}_AUTH"
+
+
+def authenticate_user(login: str, password: str) -> User:
+    normalized_login = login.strip().lower()
+    credentials = LOGIN_CREDENTIALS.get(normalized_login)
+
+    expected_password = os.getenv(build_login_secret_env_name(normalized_login), "") if credentials else ""
+
+    if credentials is None or not expected_password or not secrets.compare_digest(expected_password, password):
+        log_security_event("login_failed", normalized_login or "anonymous", "reason=invalid_credentials")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid username or password.",
+        )
+
+    user = get_user_by_id(credentials["user_id"])
+    if user is None:
+        logger.error("Authentication configuration points to missing user_id=%s", credentials["user_id"])
+        raise RuntimeError("Configured login references a missing user")
+
+    logger.info("Successful login: actor=%s user_id=%s", normalized_login, user.id)
+    return user
+
+
 def ensure_storage_dir() -> None:
     STORAGE_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def ensure_logs_dir() -> None:
+    LOGS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def save_metadata() -> None:
@@ -134,7 +206,23 @@ def load_metadata() -> List[StoredFile]:
 def startup_event() -> None:
     global files_db
     ensure_storage_dir()
+    ensure_logs_dir()
     files_db = load_metadata()
+    logger.info("Application startup complete")
+
+
+@app.middleware("http")
+async def unhandled_exception_logging_middleware(request: Request, call_next) -> Response:
+    try:
+        return await call_next(request)
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Unhandled error for %s %s", request.method, request.url.path)
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"detail": "We are sorry, something went wrong."},
+        )
 
 
 def get_file_by_id(file_id: int) -> Optional[StoredFile]:
@@ -196,6 +284,11 @@ def get_current_user(
 
 def ensure_admin(current_user: User) -> User:
     if current_user.role != "admin":
+        log_security_event(
+            "admin_endpoint_denied",
+            get_user_label(current_user),
+            "endpoint=/files/all",
+        )
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Доступ разрешён только администратору",
@@ -214,6 +307,11 @@ def authorize_file_access(file_id: int, current_user: User) -> StoredFile:
     if current_user.role == "admin" or file_item.owner_id == current_user.id:
         return file_item
 
+    log_security_event(
+        "idor_attempt",
+        get_user_label(current_user),
+        f"file_id={file_id} owner_id={file_item.owner_id}",
+    )
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
         detail="Файл не найден",
@@ -263,6 +361,7 @@ def remove_file(file_id: int) -> StoredFile:
     delete_file_from_disk(file_item)
     files_db = [current_file for current_file in files_db if current_file.id != file_id]
     save_metadata()
+    logger.info("File deleted: actor_id=%s file_id=%s path=%s", file_item.owner_id, file_item.id, file_item.path)
     return file_item
 
 
@@ -341,6 +440,13 @@ async def save_uploaded_file(
     )
     files_db.append(stored_file)
     save_metadata()
+    logger.info(
+        "File uploaded: actor=%s file_id=%s original_name=%s encrypted=%s",
+        current_user.username,
+        stored_file.id,
+        stored_file.original_name,
+        stored_file.is_encrypted,
+    )
     return stored_file
 
 
@@ -368,9 +474,26 @@ def build_page_context(
     }
 
 
+def build_login_context(request: Request, message: str = "") -> Dict[str, object]:
+    return {
+        "request": request,
+        "message": message,
+        "login_accounts": [
+            {"username": "alice", "secret_env": build_login_secret_env_name("alice"), "role": "user"},
+            {"username": "bob", "secret_env": build_login_secret_env_name("bob"), "role": "user"},
+            {"username": "admin", "secret_env": build_login_secret_env_name("admin"), "role": "admin"},
+        ],
+    }
+
+
 def build_redirect(current_user: User, message: str) -> RedirectResponse:
     params = urlencode({"user_id": current_user.id, "message": message})
     return RedirectResponse(url=f"/?{params}", status_code=status.HTTP_303_SEE_OTHER)
+
+
+def wants_html_response(request: Request) -> bool:
+    accept_header = request.headers.get("accept", "")
+    return "text/html" in accept_header
 
 
 def build_content_disposition(filename: str) -> str:
@@ -387,6 +510,53 @@ async def home(
     current_user = get_user_by_id(user_id) or users_db[0]
     context = build_page_context(request, current_user, message=message)
     return templates.TemplateResponse("files.html", context)
+
+
+@app.get("/login")
+async def login_page(
+    request: Request,
+    message: str = Query(default=""),
+) -> object:
+    return templates.TemplateResponse("login.html", build_login_context(request, message))
+
+
+@app.post("/login")
+async def login(
+    request: Request,
+    username: str = Form(...),
+    password: str = Form(...),
+) -> object:
+    try:
+        current_user = authenticate_user(username, password)
+    except HTTPException as exc:
+        if wants_html_response(request):
+            return templates.TemplateResponse(
+                "login.html",
+                build_login_context(request, str(exc.detail)),
+                status_code=exc.status_code,
+            )
+        raise
+
+    if wants_html_response(request):
+        params = urlencode(
+            {
+                "user_id": current_user.id,
+                "message": f"Вход выполнен успешно: {current_user.username}",
+            }
+        )
+        return RedirectResponse(url=f"/?{params}", status_code=status.HTTP_303_SEE_OTHER)
+
+    return {
+        "message": "Login successful.",
+        "user_id": current_user.id,
+        "username": current_user.username,
+        "role": current_user.role,
+    }
+
+
+@app.get("/cause_error")
+async def cause_error() -> Dict[str, int]:
+    return {"value": 1 / 0}
 
 
 @app.get("/ui/file")
@@ -495,6 +665,7 @@ async def download_file(
     try:
         decrypted_data = cipher_suite.decrypt(encrypted_data)
     except InvalidToken as exc:
+        logger.exception("Failed to decrypt file: file_id=%s path=%s", file_item.id, file_item.path)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Не удалось расшифровать файл",

@@ -1,15 +1,14 @@
-version: "3.7"
-
 services:
   app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: task-11-app
+    container_name: task-11-13-app
     env_file:
       - .env
     ports:
       - "82.114.226.145:8006:8000"
     volumes:
       - ./storage:/app/storage
+      - ./logs:/app/logs
     restart: unless-stopped

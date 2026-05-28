@@ -1,0 +1,10 @@
+﻿repos:
+  - repo: local
+    hooks:
+      - id: bandit-task-11-15
+        name: bandit-task-11-15
+        entry: python SecHW/sem-2/task-11-15/scripts/run_bandit_precommit.py
+        language: system
+        pass_filenames: false
+        always_run: true
+        files: ^SecHW/sem-2/task-11-15/

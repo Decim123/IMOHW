@@ -1,0 +1,13 @@
+
+ Target               │  local://task-11-hardened:latest  │    0C     0H     2M    34L     7?  
+   digest             │  cb3632992e34                     │                                    
+ Base image           │  python:3.10-slim                 │    0C    30H    31M    49L     8?  
+ Refreshed base image │  python:3.10-slim                 │    0C     1H     5M    23L     7?  
+                      │                                   │          -29    -26    -26     -1  
+ Updated base image   │  python:3.14-slim                 │    0C     0H     1M    22L     7?  
+                      │                                   │          -30    -30    -27     -1  
+
+What's next:
+    View vulnerabilities → docker scout cves local://task-11-hardened
+    View base image update recommendations → docker scout recommendations local://task-11-hardened
+    Include policy results in your quickview by supplying an organization → docker scout quickview local://task-11-hardened --org <organization>

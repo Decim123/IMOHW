@@ -1,0 +1,44 @@
+﻿name: Security Checks
+
+on:
+  push:
+    paths:
+      - 'SecHW/sem-2/task-11-15/**'
+      - '.github/workflows/security.yml'
+      - '.pre-commit-config.yaml'
+  pull_request:
+    paths:
+      - 'SecHW/sem-2/task-11-15/**'
+      - '.github/workflows/security.yml'
+      - '.pre-commit-config.yaml'
+
+jobs:
+  bandit:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: SecHW/sem-2/task-11-15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Bandit
+        run: python -m pip install --upgrade pip bandit
+
+      - name: Run Bandit scan
+        run: |
+          bandit -r . -f json -o bandit_report.json
+          bandit -r .
+
+      - name: Upload Bandit report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bandit-report
+          path: SecHW/sem-2/task-11-15/bandit_report.json

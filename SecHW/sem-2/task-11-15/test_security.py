@@ -1,13 +1,20 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import base64
-import subprocess
+import logging
+import subprocess  # nosec B404
 import sys
 import time
 from pathlib import Path
 
 import requests
 
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(message)s",
+)
+logger = logging.getLogger(__name__)
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 BASE_URL = "http://127.0.0.1:8010"
@@ -41,7 +48,7 @@ def current_storage_files() -> set[Path]:
 
 
 def main() -> None:
-    server = subprocess.Popen(
+    server = subprocess.Popen(  # nosec B603
         [
             sys.executable,
             "-m",
@@ -71,7 +78,7 @@ def main() -> None:
             timeout=10,
         )
         assert_status("Test 1 (Fake JPG)", fake_upload, 400)
-        print("Test 1 (Fake JPG): текстовый файл под видом JPG отклонён -> OK")
+        logger.info("Test 1 (Fake JPG): текстовый файл под видом JPG отклонён -> OK")
 
         huge_png = TINY_PNG + (b"0" * (MAX_FILE_SIZE_BYTES + 1))
         large_upload = requests.post(
@@ -81,7 +88,7 @@ def main() -> None:
             timeout=20,
         )
         assert_status("Test 2 (Size)", large_upload, 413)
-        print("Test 2 (Size): файл больше 2 МБ отклонён -> OK")
+        logger.info("Test 2 (Size): файл больше 2 МБ отклонён -> OK")
 
         plain_upload = requests.post(
             f"{BASE_URL}/files/upload",
@@ -93,7 +100,7 @@ def main() -> None:
         plain_file_id = plain_upload.json()["файл"]["id"]
         if plain_upload.json()["файл"]["зашифрован"] is not False:
             raise AssertionError("Test 3 (Plain upload): файл не должен быть помечен как зашифрованный")
-        print("Test 3 (Plain upload): обычный PNG загружен без шифрования -> OK")
+        logger.info("Test 3 (Plain upload): обычный PNG загружен без шифрования -> OK")
 
         storage_before = current_storage_files()
         encrypted_upload = requests.post(
@@ -114,7 +121,7 @@ def main() -> None:
         encrypted_disk_file = new_files.pop()
         if encrypted_disk_file.read_bytes() == TINY_PNG:
             raise AssertionError("Test 4 (Encrypted upload): файл на диске сохранился без шифрования")
-        print("Test 4 (Encrypted upload): файл сохранён на диске в зашифрованном виде -> OK")
+        logger.info("Test 4 (Encrypted upload): файл сохранён на диске в зашифрованном виде -> OK")
 
         foreign_download = requests.get(
             f"{BASE_URL}/files/{encrypted_file_id}/download",
@@ -122,7 +129,7 @@ def main() -> None:
             timeout=10,
         )
         assert_status("Test 5 (Download IDOR)", foreign_download, 404)
-        print("Test 5 (Download IDOR): Боб не скачал файл Алисы -> OK")
+        logger.info("Test 5 (Download IDOR): Боб не скачал файл Алисы -> OK")
 
         own_plain_download = requests.get(
             f"{BASE_URL}/files/{plain_file_id}/download",
@@ -132,7 +139,7 @@ def main() -> None:
         assert_status("Test 6 (Plain download)", own_plain_download, 200)
         if own_plain_download.content != TINY_PNG:
             raise AssertionError("Test 6 (Plain download): скачанный обычный файл не совпадает с исходным")
-        print("Test 6 (Plain download): обычный файл скачан без изменений -> OK")
+        logger.info("Test 6 (Plain download): обычный файл скачан без изменений -> OK")
 
         own_encrypted_download = requests.get(
             f"{BASE_URL}/files/{encrypted_file_id}/download",
@@ -149,9 +156,9 @@ def main() -> None:
             raise AssertionError(
                 "Test 7 (Encrypted download): после расшифровки пользователь получил неверное содержимое"
             )
-        print("Test 7 (Encrypted download): зашифрованный файл расшифрован и скачан корректно -> OK")
+        logger.info("Test 7 (Encrypted download): зашифрованный файл расшифрован и скачан корректно -> OK")
 
-        print("Все проверки безопасности успешно пройдены.")
+        logger.info("Все проверки безопасности успешно пройдены.")
     finally:
         server.terminate()
         try:
