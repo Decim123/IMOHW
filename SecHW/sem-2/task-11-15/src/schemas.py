@@ -11,6 +11,14 @@ class User(BaseModel):
     role: Literal["user", "admin"]
 
 
+class UserAccount(BaseModel):
+    id: int
+    username: str
+    login: str
+    role: Literal["user", "admin"]
+    password_hash: str
+
+
 class StoredFile(BaseModel):
     id: int
     owner_id: int

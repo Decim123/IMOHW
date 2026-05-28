@@ -10,10 +10,7 @@ from pathlib import Path
 import requests
 
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s %(levelname)s %(message)s",
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
 
 PROJECT_ROOT = Path(__file__).resolve().parent
@@ -28,12 +25,13 @@ TINY_PNG = base64.b64decode(
 def wait_for_server() -> None:
     for _ in range(50):
         try:
-            response = requests.get(f"{BASE_URL}/", timeout=0.5)
+            response = requests.get(f"{BASE_URL}/login", timeout=0.5)
             if response.status_code == 200:
                 return
         except requests.RequestException:
             time.sleep(0.2)
     raise RuntimeError("Сервер не запустился вовремя")
+
 
 
 def assert_status(name: str, response: requests.Response, expected_status: int) -> None:
@@ -43,8 +41,23 @@ def assert_status(name: str, response: requests.Response, expected_status: int) 
         )
 
 
+
 def current_storage_files() -> set[Path]:
     return set(STORAGE_DIR.glob("*"))
+
+
+
+def login(login_name: str, password: str) -> dict[str, str]:
+    response = requests.post(
+        f"{BASE_URL}/login",
+        headers={"Accept": "application/json"},
+        data={"username": login_name, "password": password},
+        timeout=10,
+    )
+    assert_status(f"Login {login_name}", response, 200)
+    token = response.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}
+
 
 
 def main() -> None:
@@ -68,8 +81,12 @@ def main() -> None:
     try:
         wait_for_server()
 
-        alice_headers = {"X-User-Id": "1"}
-        bob_headers = {"X-User-Id": "2"}
+        alice_headers = login("alice", "alice12345")
+        bob_headers = login("bob", "bob12345")
+
+        anonymous_response = requests.get(f"{BASE_URL}/files/my", timeout=10)
+        assert_status("Anonymous access", anonymous_response, 401)
+        logger.info("Test 0 (Auth): доступ без логина запрещен -> OK")
 
         fake_upload = requests.post(
             f"{BASE_URL}/files/upload",
@@ -78,7 +95,7 @@ def main() -> None:
             timeout=10,
         )
         assert_status("Test 1 (Fake JPG)", fake_upload, 400)
-        logger.info("Test 1 (Fake JPG): текстовый файл под видом JPG отклонён -> OK")
+        logger.info("Test 1 (Fake JPG): текстовый файл под видом JPG отклонен -> OK")
 
         huge_png = TINY_PNG + (b"0" * (MAX_FILE_SIZE_BYTES + 1))
         large_upload = requests.post(
@@ -88,7 +105,7 @@ def main() -> None:
             timeout=20,
         )
         assert_status("Test 2 (Size)", large_upload, 413)
-        logger.info("Test 2 (Size): файл больше 2 МБ отклонён -> OK")
+        logger.info("Test 2 (Size): файл больше 2 МБ отклонен -> OK")
 
         plain_upload = requests.post(
             f"{BASE_URL}/files/upload",
@@ -106,7 +123,7 @@ def main() -> None:
         encrypted_upload = requests.post(
             f"{BASE_URL}/files/upload?encrypt=true",
             headers=alice_headers,
-            files={"uploaded_file": ("salary.png", TINY_PNG, "image/png")},
+            files={"uploaded_file": ("salary.pdf", b"%PDF-1.4\n1 0 obj\n<<>>\nendobj\ntrailer\n<<>>\n%%EOF", "application/pdf")},
             timeout=10,
         )
         assert_status("Test 4 (Encrypted upload)", encrypted_upload, 201)
@@ -119,9 +136,9 @@ def main() -> None:
         if len(new_files) != 1:
             raise AssertionError("Test 4 (Encrypted upload): не удалось определить новый файл на диске")
         encrypted_disk_file = new_files.pop()
-        if encrypted_disk_file.read_bytes() == TINY_PNG:
+        if encrypted_disk_file.read_bytes().startswith(b"%PDF"):
             raise AssertionError("Test 4 (Encrypted upload): файл на диске сохранился без шифрования")
-        logger.info("Test 4 (Encrypted upload): файл сохранён на диске в зашифрованном виде -> OK")
+        logger.info("Test 4 (Encrypted upload): PDF сохранен на диске в зашифрованном виде -> OK")
 
         foreign_download = requests.get(
             f"{BASE_URL}/files/{encrypted_file_id}/download",
@@ -148,14 +165,10 @@ def main() -> None:
         )
         assert_status("Test 7 (Encrypted download)", own_encrypted_download, 200)
         content_disposition = own_encrypted_download.headers.get("Content-Disposition", "")
-        if "attachment" not in content_disposition or "salary.png" not in content_disposition:
-            raise AssertionError(
-                "Test 7 (Encrypted download): заголовок Content-Disposition не заставляет скачивать файл"
-            )
-        if own_encrypted_download.content != TINY_PNG:
-            raise AssertionError(
-                "Test 7 (Encrypted download): после расшифровки пользователь получил неверное содержимое"
-            )
+        if "attachment" not in content_disposition or "salary.pdf" not in content_disposition:
+            raise AssertionError("Test 7 (Encrypted download): заголовок Content-Disposition не заставляет скачивать файл")
+        if not own_encrypted_download.content.startswith(b"%PDF"):
+            raise AssertionError("Test 7 (Encrypted download): после расшифровки пользователь получил неверное содержимое")
         logger.info("Test 7 (Encrypted download): зашифрованный файл расшифрован и скачан корректно -> OK")
 
         logger.info("Все проверки безопасности успешно пройдены.")

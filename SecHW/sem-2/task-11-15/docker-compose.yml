@@ -3,12 +3,17 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: task-11-13-app
+    container_name: task-11-15-app
     env_file:
       - .env
     ports:
-      - "82.114.226.145:8006:8000"
+      - "8000:8000"
     volumes:
       - ./storage:/app/storage
       - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/login')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped

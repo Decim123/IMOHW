@@ -1,32 +1,27 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Файлообменник</title>
+    <title>Secure File Manager</title>
 </head>
 <body>
-    <h1>Файлообменник</h1>
+    <h1>Secure File Manager</h1>
     <p>Безопасная загрузка, скачивание, разграничение доступа и опциональное шифрование.</p>
 
-    <form action="/" method="get">
-        <label for="user_id">Текущий пользователь:</label>
-        <select id="user_id" name="user_id">
-            {% for user in users %}
-            <option value="{{ user.id }}" {% if user.id == current_user.id %}selected{% endif %}>
-                {{ user.username }} ({{ "администратор" if user.role == "admin" else "пользователь" }})
-            </option>
-            {% endfor %}
-        </select>
-        <button type="submit">Переключить</button>
-    </form>
+    <p>
+        Вы вошли как:
+        <strong>{{ current_user.username }}</strong>
+        ({{ "администратор" if current_user.role == "admin" else "пользователь" }})
+    </p>
 
     <p>
-        Сейчас вы вошли как:
-        <strong>{{ current_user.username }}</strong>,
-        роль:
-        <strong>{{ "администратор" if current_user.role == "admin" else "пользователь" }}</strong>.
+        <a href="/docs">Swagger /docs</a>
     </p>
+
+    <form action="/logout" method="post">
+        <button type="submit">Выйти</button>
+    </form>
 
     {% if message %}
     <p><strong>{{ message }}</strong></p>
@@ -45,20 +40,19 @@
     {% endif %}
 
     <h2>Загрузить файл</h2>
-    <form action="/ui/upload?user_id={{ current_user.id }}" method="post" enctype="multipart/form-data">
+    <form action="/ui/upload" method="post" enctype="multipart/form-data">
         <label for="uploaded_file">Файл:</label>
-        <input id="uploaded_file" name="uploaded_file" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" required>
+        <input id="uploaded_file" name="uploaded_file" type="file" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" required>
         <label>
             <input name="encrypt" type="checkbox" value="true">
             Шифровать перед сохранением
         </label>
         <button type="submit">Загрузить</button>
     </form>
-    <p>Разрешены только JPEG и PNG. Максимальный размер: {{ max_file_size_mb }} МБ.</p>
+    <p>Разрешены только JPEG, PNG и PDF. Максимальный размер: {{ max_file_size_mb }} МБ.</p>
 
     <h2>Открыть файл по идентификатору</h2>
     <form action="/ui/file" method="get">
-        <input type="hidden" name="user_id" value="{{ current_user.id }}">
         <label for="file_id">ID файла:</label>
         <input id="file_id" name="file_id" type="number" min="1" required>
         <button type="submit">Открыть</button>
@@ -69,10 +63,9 @@
         {% for file in my_files %}
         <li>
             ID {{ file.id }}: {{ file["имя"] }} ({{ file["размер_байт"] }} байт, {{ file["тип"] }}, шифрование: {{ "да" if file["зашифрован"] else "нет" }})
-            <a href="/files/{{ file.id }}?user_id={{ current_user.id }}">JSON</a>
-            <a href="/files/{{ file.id }}/download?user_id={{ current_user.id }}">Скачать</a>
+            <a href="/files/{{ file.id }}">JSON</a>
+            <a href="/files/{{ file.id }}/download">Скачать</a>
             <form action="/ui/delete" method="post" style="display:inline;">
-                <input type="hidden" name="user_id" value="{{ current_user.id }}">
                 <input type="hidden" name="file_id" value="{{ file.id }}">
                 <button type="submit">Удалить</button>
             </form>
@@ -88,12 +81,12 @@
         {% for file in all_files %}
         <li>
             ID {{ file.id }}: {{ file["имя"] }}, владелец: {{ file["владелец"] }}, размер: {{ file["размер_байт"] }} байт, тип: {{ file["тип"] }}, шифрование: {{ "да" if file["зашифрован"] else "нет" }}
-            <a href="/files/{{ file.id }}?user_id={{ current_user.id }}">JSON</a>
-            <a href="/files/{{ file.id }}/download?user_id={{ current_user.id }}">Скачать</a>
+            <a href="/files/{{ file.id }}">JSON</a>
+            <a href="/files/{{ file.id }}/download">Скачать</a>
         </li>
         {% endfor %}
     </ul>
-    <p><a href="/files/all?user_id={{ current_user.id }}">Открыть JSON со всеми файлами</a></p>
+    <p><a href="/files/all">Открыть JSON со всеми файлами</a></p>
     {% endif %}
 </body>
 </html>

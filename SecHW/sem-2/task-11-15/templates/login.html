@@ -7,7 +7,7 @@
 </head>
 <body>
     <h1>Вход</h1>
-    <p>Простая форма для проверки успешного и неуспешного входа.</p>
+    <p>Войдите в систему, чтобы работать с файлами.</p>
 
     {% if message %}
     <p><strong>{{ message }}</strong></p>
@@ -24,13 +24,12 @@
     </form>
 
     <h2>Тестовые учетные записи</h2>
-    <p>Имена пользователей доступны ниже, а секреты задаются через `.env`.</p>
     <ul>
         {% for item in login_accounts %}
-        <li>{{ item.username }} ({{ item.role }}), секрет из {{ item.secret_env }}</li>
+        <li>{{ item.username }} ({{ item.role }})</li>
         {% endfor %}
     </ul>
 
-    <p><a href="/">Вернуться на главную</a></p>
+    <p><a href="/register">Регистрация нового пользователя</a></p>
 </body>
 </html>
