@@ -1,4 +1,6 @@
 .venv/
+venv/
+venv-py314/
 .env
 __pycache__/
 src/__pycache__/

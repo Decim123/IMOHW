@@ -1,0 +1,6 @@
+exclude_dirs:
+  - venv
+  - venv-py314
+  - __pycache__
+  - logs
+  - storage

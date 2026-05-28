@@ -70,7 +70,7 @@ def configure_logging() -> logging.Logger:
 
 logger = configure_logging()
 
-load_dotenv(BASE_DIR / ".env")
+load_dotenv(BASE_DIR / ".env", encoding="utf-8-sig")
 FERNET_KEY = os.getenv("FERNET_KEY")
 if not FERNET_KEY:
     raise RuntimeError("Переменная FERNET_KEY не найдена в .env")
@@ -87,6 +87,14 @@ users_db: List[User] = [
 ]
 
 files_db: List[StoredFile] = []
+
+
+SECURITY_HEADERS = {
+    "Content-Security-Policy": "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; form-action 'self'; base-uri 'self'; frame-ancestors 'none'",
+    "X-Frame-Options": "DENY",
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "no-referrer",
+}
 
 
 def get_user_by_id(user_id: int) -> Optional[User]:
@@ -214,15 +222,19 @@ def startup_event() -> None:
 @app.middleware("http")
 async def unhandled_exception_logging_middleware(request: Request, call_next) -> Response:
     try:
-        return await call_next(request)
+        response = await call_next(request)
     except HTTPException:
         raise
     except Exception:
         logger.exception("Unhandled error for %s %s", request.method, request.url.path)
-        return JSONResponse(
+        response = JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"detail": "We are sorry, something went wrong."},
         )
+
+    for header_name, header_value in SECURITY_HEADERS.items():
+        response.headers.setdefault(header_name, header_value)
+    return response
 
 
 def get_file_by_id(file_id: int) -> Optional[StoredFile]:
@@ -687,3 +699,4 @@ async def get_file_info(file_item: StoredFile = Depends(check_file_permissions))
 async def delete_file(file_item: StoredFile = Depends(check_file_permissions)) -> Dict[str, object]:
     removed_file = remove_file(file_item.id)
     return {"сообщение": "Файл удалён", "файл": file_to_response(removed_file)}
+

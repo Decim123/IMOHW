@@ -8,6 +8,7 @@ from pathlib import Path
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
+BANDIT_CONFIG_PATH = PROJECT_ROOT / "bandit.yaml"
 
 
 def main() -> int:
@@ -21,6 +22,8 @@ def main() -> int:
             'bandit',
             '-r',
             str(PROJECT_ROOT),
+            '-c',
+            str(BANDIT_CONFIG_PATH),
             '-f',
             'json',
             '-o',
